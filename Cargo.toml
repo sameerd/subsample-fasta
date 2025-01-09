@@ -4,4 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+rand = "0.8.5"
+rand_pcg = "0.3.1"
 seq_io = "0.3.2"
+
+
+[[bin]]
+name = "subsample-fasta"
+path = "src/main.rs"
+
+[[bin]]
+name = "create_random_fasta"
+path = "src/create_random_fasta.rs"
