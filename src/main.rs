@@ -12,7 +12,7 @@ fn main() {
       // determine sequence length
       let seqlen = record.seq_lines()
                          .fold(0, |l, seq| l + seq.len());
-      if seqlen > 100 {
+      if seqlen > 400 {
           record.write_wrap(&mut stdout, 80).unwrap();
       } else {
           eprintln!("{} is only {} long", record.id().unwrap(), seqlen);

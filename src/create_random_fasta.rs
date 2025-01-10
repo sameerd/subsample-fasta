@@ -1,3 +1,9 @@
+//! # create_random_fasta.rs
+//!
+//! Create random fasta file of various sizes.
+//! Output should be fixed using a given seed.
+//! Used for testing other code via shell piping stdout
+
 use std::iter;
 use std::io;
 
