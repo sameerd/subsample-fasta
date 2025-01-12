@@ -1,35 +1,25 @@
 use std;
 use std::io;
 use std::io::{Write};
-use seq_io::fasta::{Reader,Record};
+
+use rand::prelude::*;
+use rand_pcg::Pcg64;
+
+use seq_io::fasta::{Record,Reader};
 
 use subsample_fasta::*;
 
 
 fn main() {
   
+  let mut rng = Pcg64::seed_from_u64(10); 
   let mut reader = Reader::new(io::stdin());
   
   let mut large_vecs : Vec<Vec<u8>> = Vec::new();
-  let mut large_vec_len = large_vecs.len(); // 0 but with the right type
 
-  while let Some(result) = reader.next() {
-      let record = result.unwrap();
-      // determine sequence length
-      let seqlen = record.seq_lines()
-                         .fold(0, |l, seq| l + seq.len());
-      if seqlen > 400 {
-	  // Make a new vec<u8> and write the sequence to it without 
-          // making any changes to the sequence 
-          large_vecs.push(Vec::new());
-          large_vec_len = large_vec_len + 1;
-          let _write_result = record.write_unchanged(
-				&mut large_vecs[large_vec_len-1]);
-      } else {
-          eprintln!("{} is only {} long", record.id().unwrap(), seqlen);
-      }
-  }
+  subsample_fasta::reservoir_sample(&mut rng, &mut large_vecs, &mut reader);
+
   // now print out all the large vecs to stdout
   let mut stdout = io::stdout();
-  subsample_fasta::write_vecs(&stdout, &large_vecs);
+  write_vecs(&stdout, &large_vecs);
 }
