@@ -3,6 +3,8 @@ use std::io;
 use std::io::{Write};
 use seq_io::fasta::{Reader,Record};
 
+use subsample_fasta::*;
+
 
 fn main() {
   
@@ -29,7 +31,5 @@ fn main() {
   }
   // now print out all the large vecs to stdout
   let mut stdout = io::stdout();
-  for vec in large_vecs.iter() {
-    let _ = stdout.write_all(vec);
-  }
+  subsample_fasta::write_vecs(&stdout, &large_vecs);
 }
