@@ -11,20 +11,19 @@ use subsample_fasta::*;
 
 fn main() {
   
-  let seed: u64 = 10;
-  let k: i32 = 4; // number of samples to return
-  let mut rng = Pcg64::seed_from_u64(seed); 
+  let _seed: u64 = 25;
+  let k: usize = 2;// number of samples to return
+
+  //let mut rng = Pcg64::seed_from_u64(seed); 
+  let mut rng = Pcg64::from_rng(thread_rng()).unwrap();
+
 
   let mut reader = Reader::new(io::stdin());
   
   let mut large_vecs : Vec<Vec<u8>> = Vec::new();
   
   
-  for _ in 0..k {
-    large_vecs.push(Vec::new());
-  }
-
-  reservoir_sample(&mut rng, &mut large_vecs, &mut reader);
+  reservoir_sample(&mut rng, k, &mut large_vecs, &mut reader);
 
   // now print out all the large vecs to stdout
   let stdout = io::stdout();

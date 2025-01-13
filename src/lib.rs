@@ -1,10 +1,13 @@
 use std::io;
 use rand::prelude::*;
 
-use seq_io::fasta::{Record,Reader};
+use seq_io::fasta::{Reader};
 use seq_io::policy::{BufPolicy};
 
-pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>> ) -> io::Result<()> {
+const DEBUG : bool = true;
+
+pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>> ) 
+                        -> io::Result<()> {
   for vec in vecs.iter() {
     writer.write_all(vec)?;
   }
@@ -13,26 +16,43 @@ pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>> ) -> io::Res
 
 // Implement Reservoir_sampling
 // https://en.wikipedia.org/wiki/Reservoir_sampling#Optimal:_Algorithm_L
-pub fn reservoir_sample<R : io::Read, P> (_rng : &mut impl Rng, 
-                     samples : &mut Vec<Vec<u8>>,
-                     reader : &mut Reader<R,P>) where P : BufPolicy  {
+pub fn reservoir_sample<R : io::Read, P> (rng : &mut impl Rng, 
+              k : usize, // number of samples to uniformly sample
+              samples : &mut Vec<Vec<u8>>, // where the samples are stored
+              reader : &mut Reader<R,P> // seq_io reader RefRecord iterator
+              ) where P : BufPolicy  {
 
-  let k = samples.len();
-  let mut sample_idx = 0;
+  samples.clear();
+  samples.resize(k, Vec::new());
+
+  let mut ctr : usize = 0;
+  let mut w : f64;
+  w = ((rng.gen::<f64>().ln()) / (k as f64)).exp();
+  let mut skip_until : usize;
+  skip_until = k + ((rng.gen::<f64>().ln() / (1.0 - w).ln()).floor() 
+                                 as usize);
   while let Some(result) = reader.next() {
-      let record = result.unwrap();
-      // determine sequence length
-      let seqlen = record.seq_lines()
-                         .fold(0, |l, seq| l + seq.len());
-      if seqlen > 400 {
-          if sample_idx < k {
-            let _write_result = record.write_unchanged(
-                                  &mut samples[sample_idx]);
-            sample_idx = sample_idx + 1;
-          }
+    ctr = ctr + 1;
+    let i = ctr - 1; // actual index and starts with zero
+    let record = result.unwrap();
+    if i < k {
+      if DEBUG {println!("i={}, k={} initial fill", i, k);}
+      let _ = record.write_unchanged(&mut samples[i]);
+    } else { // i >= k
+      if i < skip_until {
+        if DEBUG {println!("i={}, skip_until={} waiting", i, skip_until);}
       } else {
-          eprintln!("{} is only {} long", record.id().unwrap(), seqlen);
-      }
+        let idx_to_replace = rng.gen_range(0..k);
+        if DEBUG {println!("i={}, skip_until={} replacing {}", i, skip_until, 
+                                idx_to_replace);}
+        samples[idx_to_replace].clear();
+        let _ = record.write_unchanged(&mut samples[idx_to_replace]);
+        w = w * ((rng.gen::<f64>().ln()) / (k as f64)).exp();
+        skip_until = i + ((rng.gen::<f64>().ln() / (1.0 - w).ln()).floor() 
+                                 as usize);
+        if DEBUG {println!("i={}, skip_until={} w={}", i, skip_until, 
+                                w);}
+      } 
+    }
   }
-
 }
