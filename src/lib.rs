@@ -4,12 +4,16 @@ use rand::prelude::*;
 use seq_io::fasta::{Reader};
 use seq_io::policy::{BufPolicy};
 
-const DEBUG : bool = true;
+//const DEBUG : bool = true;
+const DEBUG : bool = false;
 
-pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>> ) 
+pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>>,
+                        indices: &Vec<usize> ) 
                         -> io::Result<()> {
-  for vec in vecs.iter() {
-    writer.write_all(vec)?;
+  let mut indices_argsort = (0..indices.len()).collect::<Vec<_>>();
+  indices_argsort.sort_by_key(|&i| &indices[i]);
+  for idx in indices_argsort.iter() {
+    let _ = writer.write_all(&vecs[*idx]);
   }
   Ok(())
 }
@@ -19,11 +23,17 @@ pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>> )
 pub fn reservoir_sample<R : io::Read, P> (rng : &mut impl Rng, 
               k : usize, // number of samples to uniformly sample
               samples : &mut Vec<Vec<u8>>, // where the samples are stored
+              indices : &mut Vec<usize>, // index of each sample in Reader (0-based)
               reader : &mut Reader<R,P> // seq_io reader RefRecord iterator
               ) where P : BufPolicy  {
 
   samples.clear();
   samples.resize(k, Vec::new());
+  
+  indices.clear();
+  for i in 0..k {
+    indices.push(i);
+  }
 
   let mut ctr : usize = 0;
   let mut w : f64;
@@ -47,6 +57,7 @@ pub fn reservoir_sample<R : io::Read, P> (rng : &mut impl Rng,
                                 idx_to_replace);}
         samples[idx_to_replace].clear();
         let _ = record.write_unchanged(&mut samples[idx_to_replace]);
+        indices[idx_to_replace] = i;
         w = w * ((rng.gen::<f64>().ln()) / (k as f64)).exp();
         skip_until = i + ((rng.gen::<f64>().ln() / (1.0 - w).ln()).floor() 
                                  as usize);

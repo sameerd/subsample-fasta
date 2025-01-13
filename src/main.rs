@@ -20,12 +20,13 @@ fn main() {
 
   let mut reader = Reader::new(io::stdin());
   
-  let mut large_vecs : Vec<Vec<u8>> = Vec::new();
+  let mut samples : Vec<Vec<u8>> = Vec::new();
+  let mut indices : Vec<usize> = Vec::new();
   
   
-  reservoir_sample(&mut rng, k, &mut large_vecs, &mut reader);
+  reservoir_sample(&mut rng, k, &mut samples, &mut indices, &mut reader);
 
   // now print out all the large vecs to stdout
   let stdout = io::stdout();
-  let _ = write_vecs(&stdout, &large_vecs);
+  let _ = write_vecs(&stdout, &samples, &indices);
 }
