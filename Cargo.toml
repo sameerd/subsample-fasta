@@ -18,6 +18,10 @@ name = "subsample-fasta"
 path = "src/main.rs"
 
 [[bin]]
+name = "subsample_fastq"
+path = "src/subsample_fastq.rs"
+
+[[bin]]
 name = "create_random_fasta"
 path = "src/create_random_fasta.rs"
 

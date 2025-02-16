@@ -5,6 +5,8 @@ use rand::prelude::*;
 use seq_io::fasta::{Reader};
 use seq_io::policy::{BufPolicy};
 
+use seq_io::fastq::Reader as Reader_fastq;
+
 //const DEBUG : bool = true;
 const DEBUG : bool = false;
 
