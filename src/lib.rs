@@ -19,10 +19,18 @@ pub fn generate_random(pool : &[u8], rng : &mut impl Rng, len: usize) -> Vec<u8>
 }
 
 pub fn generate_random_aa(rng : &mut impl Rng, len: usize) -> Vec<u8> {
-  return generate_random(STANDARD_AA, rng, len);
+  generate_random(STANDARD_AA, rng, len)
 }
+
 pub fn generate_random_nt(rng : &mut impl Rng, len: usize) -> Vec<u8> {
-  return generate_random(STANDARD_NT, rng, len);
+  generate_random(STANDARD_NT, rng, len)
+}
+
+pub fn generate_random_qual(rng : &mut impl Rng, len: usize) -> Vec<u8> {
+  const QUAL_START : u8 = 0x21; // ! char (lowest quality)
+  const QUAL_END : u8 = 0x7e; // ~ char (highest quality)
+  let one_u8 = || rng.gen_range(QUAL_START..=QUAL_END) ;
+  iter::repeat_with(one_u8).take(len).collect()
 }
 
 

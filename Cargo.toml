@@ -20,3 +20,7 @@ path = "src/main.rs"
 [[bin]]
 name = "create_random_fasta"
 path = "src/create_random_fasta.rs"
+
+[[bin]]
+name = "create_random_fastq"
+path = "src/create_random_fastq.rs"

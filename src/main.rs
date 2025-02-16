@@ -16,20 +16,19 @@ struct Cli {
   #[arg(short, long, default_value_t = 2)]
   num_seq: usize,
 
-// seed : u64, // add a seed if we want reproducibility
+  #[arg(short, long, default_value_t = 42)]
+  seed : u64, // add a seed for reproducibility
 
 }
 
 fn main() {
   
-  let _seed: u64 = 25;
   let cli = Cli::parse();
 
   let k = cli.num_seq;
+  let seed = cli.seed;
 
-  //let mut rng = Pcg64::seed_from_u64(seed); 
-  let mut rng = Pcg64::from_rng(thread_rng()).unwrap();
-
+  let mut rng = Pcg64::seed_from_u64(seed);
 
   let mut reader = Reader::new(io::stdin());
   
@@ -37,6 +36,8 @@ fn main() {
   let mut indices : Vec<usize> = Vec::new();
   
   
+  // sample a fixed number of sequences k. The entire sample
+  // must be able to fit in memory so it should not be too large
   reservoir_sample(&mut rng, k, &mut samples, &mut indices, &mut reader);
 
   // now print out all the large vecs to stdout
