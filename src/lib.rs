@@ -1,3 +1,4 @@
+use std::iter;
 use std::io;
 use rand::prelude::*;
 
@@ -6,6 +7,27 @@ use seq_io::policy::{BufPolicy};
 
 //const DEBUG : bool = true;
 const DEBUG : bool = false;
+
+const STANDARD_AA: &[u8] = b"ACDEFGHIKLMNPQRSTVWY";
+const STANDARD_NT: &[u8] = b"ACGT";
+
+pub fn generate_random(pool : &[u8], rng : &mut impl Rng, len: usize) -> Vec<u8> {
+  // Copied from https://stackoverflow.com/a/74953997
+  // Changed to return Vec<u8>
+  let one_u8 = || pool[rng.gen_range(0..pool.len())] ;
+  iter::repeat_with(one_u8).take(len).collect()
+}
+
+pub fn generate_random_aa(rng : &mut impl Rng, len: usize) -> Vec<u8> {
+  return generate_random(STANDARD_AA, rng, len);
+}
+pub fn generate_random_nt(rng : &mut impl Rng, len: usize) -> Vec<u8> {
+  return generate_random(STANDARD_NT, rng, len);
+}
+
+
+
+
 
 pub fn write_vecs<W: io::Write>(mut writer: W, vecs : &Vec<Vec<u8>>,
                         indices: &Vec<usize> ) 
@@ -67,3 +89,5 @@ pub fn reservoir_sample<R : io::Read, P> (rng : &mut impl Rng,
     }
   }
 }
+
+

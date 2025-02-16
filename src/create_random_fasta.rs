@@ -4,13 +4,15 @@
 //! Output should be fixed using a given seed.
 //! Used for testing other code via shell piping stdout
 
-use std::iter;
 use std::io;
 
 use rand::prelude::*;
 use rand_pcg::Pcg64;
 
 use seq_io::fasta::{Record, OwnedRecord};
+
+use subsample_fasta::*;
+
 
 use clap::{Parser};
 
@@ -35,13 +37,6 @@ struct Cli {
 
 }
 
-fn generate_random_aa(rng : &mut impl Rng, len: usize) -> Vec<u8> {
-  // Copied from https://stackoverflow.com/a/74953997
-  // Changed to return Vec<u8>
-  const STANDARD_AA: &[u8] = b"ACDEFGHIKLMNPQRSTVWY";
-  let one_u8 = || STANDARD_AA[rng.gen_range(0..STANDARD_AA.len())] ;
-  iter::repeat_with(one_u8).take(len).collect()
-}
 
 
 fn main() {
